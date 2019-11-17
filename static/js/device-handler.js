@@ -12,10 +12,10 @@ class DeviceHandler {
             $.ajax({
                 url: "/deviceIds",
                 type: "POST",
-                success: data => {
+                success: (data) => {
                     resolve(data);
                 },
-                error: data => {
+                error: (data) => {
                     reject(data);
                 }
             });

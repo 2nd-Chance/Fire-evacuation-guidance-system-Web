@@ -1,7 +1,7 @@
 function log(methodArgs, ...message) {
     let name = methodArgs.callee.name;
     name = name === "" ? "(anonymous)" : name;
-    Console.log("[" + name + "]\n" + message.join(" "));
+    console.log("[" + name + "]\n" + message.join(" "));
 }
 
 window.onload = function(){
@@ -14,7 +14,7 @@ function refreshRoomHtml() {
 
 async function getRoom(){
     await RoomHandler.updateDomList($("#roomList"))
-        .catch((err) => Console.log(err));
+        .catch((err) => console.log(err));
     refreshRoomHtml();
 }
 
@@ -24,6 +24,6 @@ function refreshDeviceHtml() {
 
 async function getDevices() {
     await DeviceHandler.updateDomList($("#deviceList"))
-        .catch((err) => Console.log(err));
+        .catch((err) => console.log(err));
     refreshDeviceHtml();
 }

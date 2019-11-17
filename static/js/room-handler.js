@@ -36,10 +36,10 @@ class RoomHandler {
                     key: id
                 },
                 dataType: "json",
-                success: data => {
+                success: (data) => {
                     resolve(data);
                 },
-                error: data => {
+                error: (data) => {
                     reject(data);
                 }
             });
