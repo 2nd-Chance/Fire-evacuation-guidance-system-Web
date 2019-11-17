@@ -1,0 +1,50 @@
+#navBar {
+    height: 15%;
+    background-color: red;
+    display: block;
+    color: white;
+    font-weight: bold;
+    font-size: larger;
+}
+
+#bottomTab {
+    height: 20%;
+    background-color: #ffffff;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    z-index: 999;
+    box-shadow: 0 1px 10px gray;
+}
+
+#bottomTab ul {
+    background-color: white;
+}
+
+.tab {
+    display: inline;
+    height: 100%;
+    width: 33%;
+    float: left;
+}
+
+.tabContainer {
+    width: 100%;
+}
+
+.cursorPointer {
+    cursor: pointer;
+}
+
+.hoverTextShadow :hover {
+    text-shadow: 0 0 5px gray;
+}
+
+.tab_text {
+    text-align: center;
+}
+
+.tab_img {
+    display: block;
+    margin: 0 auto;
+}
