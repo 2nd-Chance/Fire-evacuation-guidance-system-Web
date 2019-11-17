@@ -10,7 +10,7 @@ class DeviceHandler {
     static getUuids() {
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: "/deviceIds",
+                url: "/get/deviceIds",
                 type: "POST",
                 success: (data) => {
                     resolve(data);
@@ -30,7 +30,7 @@ class DeviceHandler {
     static getByUuid(uuid) {
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: "/device",
+                url: "/get/device",
                 type: "POST",
                 data: {
                     key: uuid
@@ -67,7 +67,7 @@ class DeviceHandler {
      * @param device {Device}
      * @returns {jQuery} returns a DOM
      */
-    static createDom(device) {
+    static toDom(device) {
         return $("<device/>")
             .attr("id", "device" + device.uuid)
             .attr("uuid", device.uuid)
@@ -95,7 +95,7 @@ class DeviceHandler {
 
             const device = devices[devicesKey];
             // log(arguments, "key:", devicesKey, "\njson:", JSON.stringify(device));
-            $listContainer.append(this.createDom(device));
+            $listContainer.append(this.toDom(device));
         }
     }
 
@@ -105,27 +105,111 @@ class DeviceHandler {
      * @param device {jQuery|Device|string}
      */
     static async updateDom($listContainer, device) {
-        let uuid;
-        uuid = this.getUuid(device);
-
+        const uuid = this.toUuid(device);
         const $existDom = $("#device" + uuid);
         if ($existDom.length) {
             $existDom.remove();
         }
 
         device = await this.getByUuid(uuid);
-        $listContainer.append(this.createDom(device));
+        $listContainer.append(this.toDom(device));
     }
 
-    static getUuid(device) {
+    /**
+     * @param device {jQuery|Device|string}
+     * @returns {Promise<void>}
+     */
+    static updateToServer(device) {
+        device = this.toDevice(device);
+
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: "/update/device",
+                type: "POST",
+                data: {
+                    deviceJson: JSON.stringify(device)
+                },
+                dataType: "json",
+                success: (data) => {
+                    resolve(data);
+                },
+                error: (data) => {
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    /**
+     * @param device {jQuery|Device|string}
+     * @returns {Promise<void>}
+     */
+    static addToServer(device) {
+        device = this.toDevice(device);
+
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: "/add/device",
+                type: "POST",
+                data: {
+                    deviceJson: JSON.stringify(device)
+                },
+                dataType: "json",
+                success: (data) => {
+                    resolve(data);
+                },
+                error: (data) => {
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    /**
+     * @param device {jQuery|Device|string}
+     * @returns {string}
+     */
+    static toUuid(device) {
         let uuid;
-        if (typeof device === "object" && device.uuid) {
-            uuid = device.uuid;
-        } else if (typeof device === "object" && device.attr) {
+        if (typeof device === "object" && device.attr) {
             uuid = device.attr("uuid");
+        } else if (typeof device === "object" && device.uuid) {
+            uuid = device.uuid;
         } else if (typeof device === "string") {
             uuid = device;
         }
         return uuid;
+    }
+
+    /**
+     * @param device {jQuery|Device|string}
+     * @returns {Device}
+     */
+    static toDevice(device) {
+        let object;
+        if (typeof device === 'object' && device.attr) {
+            object = this.domToDevice(device);
+        } else if (typeof device === 'object' && device.uuid) {
+            object = device;
+        } else if (typeof device === 'string') {
+            object = this.domToDevice($("#device" + device));
+        }
+        return object;
+    }
+
+    /**
+     * @param dom {jQuery}
+     * @returns {Device}
+     */
+    static domToDevice(dom) {
+        const device = {};
+        device["uuid"] = dom.attr("uuid");
+        device["deviceType"] = dom.attr("type");
+        // device["bluetoothMac"] = dom.attr("btMac");
+        // device["deviceClass"] = dom.attr("class");
+        // device["alertState"] = dom.attr("alert");
+        // device["aliveState"] = dom.attr("alive");
+        device["roomId"] = dom.attr("room");
+        return device;
     }
 }

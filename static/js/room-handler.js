@@ -1,16 +1,16 @@
 class RoomHandler {
     /**
-     * @typedef {{id,name,locationX,locationY,locationLevel,alertState,aliveState,links,staticDevices,dynamicDevices}} Room
+     * @typedef {{roomId,name,locationX,locationY,locationLevel,alertState,aliveState,links,staticDevices,dynamicDevices}} Room
      */
 
     /**
      * Gets the list of ids of all registered rooms from the server
-     * @returns {Promise<string[]>} returns a list
+     * @returns {Promise<number[]>} returns a list
      */
     static getIds() {
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: "/roomIds",
+                url: "/get/roomIds",
                 type: "POST",
                 success: (data) => {
                     resolve(data);
@@ -30,7 +30,7 @@ class RoomHandler {
     static getById(id) {
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: "/room",
+                url: "/get/room",
                 type: "POST",
                 data: {
                     key: id
@@ -57,7 +57,7 @@ class RoomHandler {
         for (const id of roomIds) {
             const roomJson = await this.getById(id);
             // log(arguments, "id:", id, "\njson:", JSON.stringify(roomJson));
-            rooms[roomJson.id] = roomJson;
+            rooms[roomJson.roomId] = roomJson;
         }
         return rooms;
     }
@@ -67,10 +67,10 @@ class RoomHandler {
      * @param room {Room}
      * @returns {jQuery} returns a DOM
      */
-    static createDom(room) {
+    static toDom(room) {
         const roomDom = $("<room/>")
-            .attr("id", "room" + room.id)
-            .attr("roomId", room.id)
+            .attr("id", "room" + room.roomId)
+            .attr("roomId", room.roomId)
             .attr("name", room.name)
             .attr("alert", room.alertState)
             // .attr("alive", room.aliveState)
@@ -106,7 +106,7 @@ class RoomHandler {
 
             const room = rooms[roomsKey];
             // log(arguments, "key:", roomsKey, "\njson:", JSON.stringify(room));
-            $listContainer.append(this.createDom(room));
+            $listContainer.append(this.toDom(room));
         }
     }
 
@@ -116,14 +116,7 @@ class RoomHandler {
      * @param room {jQuery|Room|number}
      */
     static async updateDom($listContainer, room) {
-        let id;
-        if (typeof room === "object" && room.id) {
-            id = parseInt(room.id, 10);
-        } else if (typeof room === "object" && room.attr) {
-            id = parseInt(room.attr("roomId"), 10);
-        } else if (typeof room === "number") {
-            id = room;
-        }
+        let id = this.toId(room);
 
         const $existDom = $("#room" + id);
         if ($existDom.length) {
@@ -131,6 +124,121 @@ class RoomHandler {
         }
 
         room = await this.getById(id);
-        $listContainer.append(this.createDom(room));
+        $listContainer.append(this.toDom(room));
+    }
+
+    /**
+     * @param room {jQuery|Room|number}
+     */
+    static updateToServer(room) {
+        room = this.toRoom(room);
+
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: "/update/room",
+                type: "POST",
+                data: {
+                    roomJson: JSON.stringify(room)
+                },
+                dataType: "json",
+                success: (data) => {
+                    resolve(data);
+                },
+                error: (data) => {
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    /**
+     * @param room {jQuery|Room|number}
+     */
+    static addToServer(room) {
+        room = this.toRoom(room);
+
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: "/add/room",
+                type: "POST",
+                data: {
+                    roomJson: JSON.stringify(room)
+                },
+                dataType: "json",
+                success: (data) => {
+                    resolve(data);
+                },
+                error: (data) => {
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    /**
+     * @param room {jQuery|Room|number}
+     * @returns {number}
+     */
+    static toId(room) {
+        let id;
+        if (typeof room === "object" && room.roomId) {
+            id = parseInt(room.roomId, 10);
+        } else if (typeof room === "object" && room.attr) {
+            id = parseInt(room.attr("roomId"), 10);
+        } else if (typeof room === "number") {
+            id = room;
+        }
+        return id;
+    }
+
+    /**
+     * @param room {jQuery|Room|number}
+     * @returns {Room}
+     */
+    static toRoom(room) {
+        let object;
+        if (typeof room === 'object' && room.attr) {
+            object = this.domToRoom(room);
+        } else if (typeof room === 'object' && room.roomId) {
+            object = room;
+        } else if (typeof room === 'number') {
+            object = this.domToRoom($("#room" + room));
+        }
+        return object;
+    }
+
+    /**
+     * @param dom {jQuery}
+     * @returns {Room}
+     */
+    static domToRoom(dom) {
+        const room = {};
+        room["roomId"] = dom.attr("roomId");
+        room["name"] = dom.attr("name");
+        room["alertState"] = dom.attr("alert");
+        // room["aliveState"] = dom.attr("alive");
+        room["locationX"] = dom.attr("x");
+        room["locationY"] = dom.attr("y");
+        room["locationLevel"] = dom.attr("level");
+
+        let list = [];
+        dom.find("linkTo").each(function() {
+            list.push(parseInt(this.innerText));
+        });
+        room["links"] = list;
+
+        list = [];
+        dom.find("staticDevice").each(function() {
+           list.push(this.innerText);
+        });
+        room["staticDevices"] = list;
+
+        list = [];
+        dom.find("dynamicDevice").each(function() {
+           list.push(this.innerText);
+        });
+        room["dynamicDevices"] = list;
+
+        return room;
     }
 }

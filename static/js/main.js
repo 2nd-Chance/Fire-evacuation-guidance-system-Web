@@ -4,15 +4,15 @@ function log(methodArgs, ...message) {
     console.log("[" + name + "]\n" + message.join(" "));
 }
 
-window.onload = function(){
-    log(arguments,"Welcome!");
+window.onload = function () {
+    log(arguments, "Welcome!");
 };
 
 function refreshRoomHtml() {
     $("#roomHtml").text($("#roomList").html());
 }
 
-async function getRoom(){
+async function getRoom() {
     await RoomHandler.updateDomList($("#roomList"))
         .catch((err) => console.log(err));
     refreshRoomHtml();
