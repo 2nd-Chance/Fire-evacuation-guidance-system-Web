@@ -12,13 +12,13 @@ class RoomHandler {
             $.ajax({
                 url: "/roomIds",
                 type: "POST",
-                success: data => {
+                success: (data) => {
                     resolve(data);
                 },
-                error: data => {
+                error: (data) => {
                     reject(data);
                 }
-            })
+            });
         });
     }
 
@@ -56,7 +56,7 @@ class RoomHandler {
 
         for (const id of roomIds) {
             const roomJson = await this.getById(id);
-            log(arguments, "id:", id, "\njson:", JSON.stringify(roomJson));
+            // log(arguments, "id:", id, "\njson:", JSON.stringify(roomJson));
             rooms[roomJson.id] = roomJson;
         }
         return rooms;
@@ -96,17 +96,17 @@ class RoomHandler {
      * @returns {Promise<void>}
      */
     static async updateDomList($listContainer) {
-        try {
-            const rooms = await this.getAll();
-            $listContainer.empty();
+        const rooms = await this.getAll();
+        $listContainer.empty();
 
-            for (const roomsKey in rooms) {
-                const room = rooms[roomsKey];
-                log(arguments, "key:", roomsKey, "\njson:", JSON.stringify(room));
-                $listContainer.append(this.createDom(room));
+        for (const roomsKey in rooms) {
+            if (!rooms.hasOwnProperty(roomsKey)) {
+                continue;
             }
-        } catch (err) {
-            console.error(err);
+
+            const room = rooms[roomsKey];
+            // log(arguments, "key:", roomsKey, "\njson:", JSON.stringify(room));
+            $listContainer.append(this.createDom(room));
         }
     }
 
@@ -118,9 +118,9 @@ class RoomHandler {
     static async updateDom($listContainer, room) {
         let id;
         if (typeof room === "object" && room.id) {
-            id = parseInt(room.id);
+            id = parseInt(room.id, 10);
         } else if (typeof room === "object" && room.attr) {
-            id = parseInt(room.attr("roomId"));
+            id = parseInt(room.attr("roomId"), 10);
         } else if (typeof room === "number") {
             id = room;
         }

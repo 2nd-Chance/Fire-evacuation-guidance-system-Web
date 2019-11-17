@@ -18,7 +18,7 @@ class DeviceHandler {
                 error: data => {
                     reject(data);
                 }
-            })
+            });
         });
     }
 
@@ -36,10 +36,10 @@ class DeviceHandler {
                     key: uuid
                 },
                 dataType: "json",
-                success: data => {
+                success: (data) => {
                     resolve(data);
                 },
-                error: data => {
+                error: (data) => {
                     reject(data);
                 }
             });
@@ -56,7 +56,7 @@ class DeviceHandler {
 
         for (const uuid of deviceIds) {
             const deviceJson = await this.getByUuid(uuid);
-            log(arguments, "uuid:", uuid, "\njson:", JSON.stringify(deviceJson));
+            // log(arguments, "uuid:", uuid, "\njson:", JSON.stringify(deviceJson));
             devices[deviceJson.uuid] = deviceJson;
         }
         return devices;
@@ -85,17 +85,17 @@ class DeviceHandler {
      * @returns {Promise<void>}
      */
     static async updateDomList($listContainer) {
-        try {
-            const devices = await this.getAll();
-            $listContainer.empty();
+        const devices = await this.getAll();
+        $listContainer.empty();
 
-            for (const devicesKey in devices) {
-                const device = devices[devicesKey];
-                log(arguments, "key:", devicesKey, "\njson:", JSON.stringify(device));
-                $listContainer.append(this.createDom(device));
+        for (const devicesKey in devices) {
+            if (!devices.hasOwnProperty(devicesKey)) {
+                continue;
             }
-        } catch (err) {
-            console.error(err);
+
+            const device = devices[devicesKey];
+            // log(arguments, "key:", devicesKey, "\njson:", JSON.stringify(device));
+            $listContainer.append(this.createDom(device));
         }
     }
 
@@ -106,13 +106,7 @@ class DeviceHandler {
      */
     static async updateDom($listContainer, device) {
         let uuid;
-        if (typeof device === "object" && device.uuid) {
-            uuid = device.uuid;
-        } else if (typeof device === "object" && device.attr) {
-            uuid = device.attr("uuid");
-        } else if (typeof device === "string") {
-            uuid = device;
-        }
+        uuid = this.getUuid(device);
 
         const $existDom = $("#device" + uuid);
         if ($existDom.length) {
@@ -121,5 +115,17 @@ class DeviceHandler {
 
         device = await this.getByUuid(uuid);
         $listContainer.append(this.createDom(device));
+    }
+
+    static getUuid(device) {
+        let uuid;
+        if (typeof device === "object" && device.uuid) {
+            uuid = device.uuid;
+        } else if (typeof device === "object" && device.attr) {
+            uuid = device.attr("uuid");
+        } else if (typeof device === "string") {
+            uuid = device;
+        }
+        return uuid;
     }
 }
