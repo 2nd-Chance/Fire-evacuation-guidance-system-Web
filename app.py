@@ -107,7 +107,7 @@ def add_device():
 
 
 def add_device_to_db(device):
-    if not "uuid" in device or device["uuid"] == "":
+    if "uuid" not in device or device["uuid"] == "":
         return False
 
     value_dict = dict()
@@ -197,7 +197,7 @@ def add_room():
 
 
 def add_room_to_db(room):
-    if not "roomId" in room or room["roomId"] == "":
+    if "roomId" not in room or room["roomId"] == "":
         return False
 
     value_dict = dict()

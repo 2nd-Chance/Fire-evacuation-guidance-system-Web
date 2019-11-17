@@ -13,8 +13,7 @@ function refreshRoomHtml() {
 }
 
 async function getRoom() {
-    await RoomHandler.updateDomList($("#roomList"))
-        .catch((err) => console.log(err));
+    await RoomHandler.updateDomList($("#roomList"));
     refreshRoomHtml();
 }
 
@@ -23,7 +22,6 @@ function refreshDeviceHtml() {
 }
 
 async function getDevices() {
-    await DeviceHandler.updateDomList($("#deviceList"))
-        .catch((err) => console.log(err));
+    await DeviceHandler.updateDomList($("#deviceList"));
     refreshDeviceHtml();
 }

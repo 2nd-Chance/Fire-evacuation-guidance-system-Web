@@ -197,11 +197,11 @@ class RoomHandler {
      */
     static toRoom(room) {
         let object;
-        if (typeof room === 'object' && room.attr) {
+        if (typeof room === "object" && room.attr) {
             object = this.domToRoom(room);
-        } else if (typeof room === 'object' && room.roomId) {
+        } else if (typeof room === "object" && room.roomId) {
             object = room;
-        } else if (typeof room === 'number') {
+        } else if (typeof room === "number") {
             object = this.domToRoom($("#room" + room));
         }
         return object;
@@ -223,7 +223,7 @@ class RoomHandler {
 
         let list = [];
         dom.find("linkTo").each(function() {
-            list.push(parseInt(this.innerText));
+            list.push(parseInt(this.innerText, 10));
         });
         room["links"] = list;
 

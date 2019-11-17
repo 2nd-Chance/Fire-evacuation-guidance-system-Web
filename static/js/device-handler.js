@@ -187,11 +187,11 @@ class DeviceHandler {
      */
     static toDevice(device) {
         let object;
-        if (typeof device === 'object' && device.attr) {
+        if (typeof device === "object" && device.attr) {
             object = this.domToDevice(device);
-        } else if (typeof device === 'object' && device.uuid) {
+        } else if (typeof device === "object" && device.uuid) {
             object = device;
-        } else if (typeof device === 'string') {
+        } else if (typeof device === "string") {
             object = this.domToDevice($("#device" + device));
         }
         return object;
