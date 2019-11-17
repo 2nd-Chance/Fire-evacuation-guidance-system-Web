@@ -86,6 +86,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
@@ -107,11 +110,12 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1" />
-    <option name="y" value="240" />
+    <option name="x" value="540" />
+    <option name="y" value="134" />
     <option name="width" value="1535" />
     <option name="height" value="910" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -150,6 +154,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../blocklylibrary" />
     <property name="list.type.of.created.stylesheet" value="CSS" />
@@ -197,15 +202,15 @@
       <option name="presentableId" value="Default" />
       <updated>1573864495315</updated>
       <workItem from="1573864496435" duration="17021000" />
-      <workItem from="1573940482946" duration="21404000" />
+      <workItem from="1573940482946" duration="21848000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="38425000" />
+    <option name="totallyTimeSpent" value="38869000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1" y="240" width="1535" height="910" extended-state="0" />
+    <frame x="540" y="134" width="1535" height="910" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1997328" />
@@ -214,7 +219,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32936078" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.4105534" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.41108248" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
