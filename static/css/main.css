@@ -5,3 +5,6 @@ body{
     margin-height:0;
     background-color:#A3A6BA;
 }
+.redBorder{
+    border: red 2px solid;
+}
