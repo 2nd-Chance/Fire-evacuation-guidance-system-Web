@@ -1,0 +1,48 @@
+/*#Edit_Map_canvas {*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*}*/
+
+.canvasContainer {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#nodeCollection_open_button {
+    width:100%;
+    bottom: 0;
+    text-align: center;
+    position: absolute;
+    border-top: 1px solid black;
+}
+
+#trashBin {
+    position: absolute;
+    bottom: 30%;
+    right: 5%;
+}
+
+#nodeCollection_close_button{
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+
+#nodeCollection {
+    height: 40%;
+    width: 100%;
+    position: absolute;
+    bottom: 20%;
+    border-top: 1px solid black;
+    background-color: white;
+}
+
+.node {
+    background-color: antiquewhite;
+    border-bottom: 1px solid black;
+    font-weight: bold;
+    height: 15%;
+    width: 100%;
+    display: block;
+    text-align: center;
+}
