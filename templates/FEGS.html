@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="../static/css/Tab.css">
+<link rel="stylesheet" href="../static/css/FEGS.css">
+<link rel="stylesheet" href="../static/css/Canvas.css">
+<script src="../static/js/EditMapCanvas.js"></script>
+<script src="../static/js/EvacuationRouteCanvas.js"></script>
+<script src="../static/js/Control.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>Fire Evacuation Guidance System</title>
+    <script>
+        'use strict';
+        let control;
+        let EMCanvas;
+        let ERCanvas;
+
+        function start() {
+            tabInit();
+            EMCanvas = new EditMapCanvas();
+            ERCanvas = new EvacuationRouteCanvas();
+            control = new Control();
+            control.setAlert(false);
+
+            EMCanvas.drawTrashCan();
+            setCanvasSize();
+        }
+
+        function setCanvasSize() {
+            let _page = document.querySelector("div.page");
+            let _canvas1 = document.getElementById("Edit_Map_canvas");
+            let _canvas2 = document.getElementById("Evacuation_Route_canvas");
+
+            _canvas1.width = 400;
+            _canvas1.height = 400;
+            _canvas2.width = 400;
+            _canvas2.height = 400;
+        }
+
+        function tabInit() {
+            showTab('Home', 'Home_tab');
+            hideTab('Edit_Map', 'Edit_Map_tab');
+            hideTab('Evacuation_Route', 'Evacuation_Route_tab');
+        }
+
+        function hideTab(page, tab) {
+            document.getElementById(page).style.display = 'none';
+            document.getElementById(page + '_img').src = '../static/image/' + page + '_black.png'
+            document.getElementById(tab).style.color = 'black';
+            document.getElementById(tab).style.backgroundColor = 'white';
+        }
+
+        function showTab(page, tab) {
+            document.getElementById(page).style.display = 'block';
+            document.getElementById(page + '_img').src = '../static/image/' + page + '_red.png'
+            document.getElementById(tab).style.color = 'red';
+            document.getElementById(tab).style.backgroundColor = '#B7B7B7';
+        }
+
+        function changeTab(tab) {
+            if (tab.id === "Home_tab") {
+                showTab('Home', 'Home_tab');
+                hideTab('Edit_Map', 'Edit_Map_tab');
+                hideTab('Evacuation_Route', 'Evacuation_Route_tab');
+            } else if (tab.id === "Edit_Map_tab") {
+                hideTab('Home', 'Home_tab');
+                showTab('Edit_Map', 'Edit_Map_tab');
+                hideTab('Evacuation_Route', 'Evacuation_Route_tab')
+            } else if (tab.id === "Evacuation_Route_tab") {
+                hideTab('Edit_Map', 'Edit_Map_tab');
+                hideTab('Home', 'Home_tab');
+                showTab('Evacuation_Route', 'Evacuation_Route_tab')
+            }
+        }
+
+        function showNodeCollection() {
+            document.getElementById('nodeCollection').style.display = 'block';
+            document.getElementById('nodeCollection_open_button').style.display = 'none';
+        }
+
+        function hideNodeCollection() {
+            document.getElementById('nodeCollection').style.display = 'none';
+            document.getElementById('nodeCollection_open_button').style.display = 'block';
+        }
+    </script>
+</head>
+
+<body onload="start()">
+    <div id="navBar">Fire Evacuation Guidance System</div>
+    <div id="pageContainer">
+        <div id="Home" class="page">
+            <div id="home_image_container">
+                <img id="home_image" src="../static/image/standing_black.png">
+            </div>
+            <h1 id="home_text">There is no fire. <br> You are safe.</h1>
+        </div>
+        <div id="Edit_Map" class="page">
+            <div class="canvasContainer">
+                <div id="save_mode_button" class="cursorPointer" style="display: block; float: right; padding-top: 3px; padding-right: 3px;">
+                    <img src="../static/image/pen-write_black.png" onclick="EMCanvas.changeMode()">
+                    <img src="../static/image/save_black.png" onclick="EMCanvas.saveMap()">
+                </div>
+                <canvas id="Edit_Map_canvas" onclick="EMCanvas.canvasEvent(event)"></canvas>
+                <div id="nodeCollection_open_button" class="cursorPointer" onClick="showNodeCollection()">
+                    <img src="../static/image/up-arrow_black.png">
+                </div>
+            </div>
+<!--            <div id="trashBin">-->
+<!--                <img src="static/image/trash_bin_black.png">-->
+<!--            </div>-->
+            <div id="nodeCollection" style="display: none;">
+                <div id="nodeCollection_close_button" class="cursorPointer" onclick="hideNodeCollection()">
+                    <img src="../static/image/down-arrow_black.png">
+                </div>
+                <div id="freeNodeList">
+                    <!--동적으로 새로운 노드 추가-->
+                    <room class="cursorPointer node" roomId="1" onclick="EMCanvas.addRoomToCanvas('1')">room1</room>
+                    <room class="cursorPointer node" roomId="2" onclick="EMCanvas.addRoomToCanvas('2')">room2</room>
+                    <room class="cursorPointer node" roomId="3" onclick="EMCanvas.addRoomToCanvas('3')">room3</room>
+
+                </div>
+            </div>
+
+            <div id="roomList" style="display: none; float: right;">
+                <room roomId="1" alertState="0" name="room1" X="0" Y="0" level="0">
+                    <statcieDevice>
+
+                    </statcieDevice>
+                    <dynamicDevice>
+
+                    </dynamicDevice>
+
+                    <linkTo>2</linkTo>
+                    <linkTo>3</linkTo>
+                </room>
+                <room roomId="2" alertState="0" name="room2" X="0" Y="0" level="0">
+                    <statcieDevice>
+
+                    </statcieDevice>
+                    <dynamicDevice>
+
+                    </dynamicDevice>
+
+                    <linkTo>2</linkTo>
+                    <linkTo>3</linkTo>
+                </room>
+                <room roomId="3" alertState="0" name="room3" X="0" Y="0" level="0">
+                    <statcieDevice>
+
+                    </statcieDevice>
+                    <dynamicDevice>
+
+                    </dynamicDevice>
+
+                    <linkTo>2</linkTo>
+                    <linkTo>3</linkTo>
+                </room>
+            </div>
+        </div>
+        <div id="Evacuation_Route" class="page">
+            <div class="canvasContainer">
+                <canvas id="Evacuation_Route_canvas"></canvas>
+            </div>
+        </div>
+    </div>
+    <div id="bottomTab">
+        <div class="tabContainer cursorPointer hoverTextShadow">
+                <div id="Home_tab" class="tab" onclick="changeTab(this)">
+                    <img class="tab_img" id="Home_img" src="../static/image/Home_black.png">
+                    <div class="tab_text">Home</div>
+                </div>
+                <div id="Edit_Map_tab" class="tab" onclick="changeTab(this)">
+                    <img class="tab_img" id="Edit_Map_img" src="../static/image/Edit_Map_black.png">
+                    <div class="tab_text">Edit Map</div>
+                </div>
+                <div id="Evacuation_Route_tab" class="tab" onclick="changeTab(this)">
+                    <img class="tab_img" id="Evacuation_Route_img" src="../static/image/Evacuation_Route_black.png">
+                    <div class="tab_text">Evac. Route</div>
+                </div>
+        </div>
+    </div>
+</body>
+</html>
