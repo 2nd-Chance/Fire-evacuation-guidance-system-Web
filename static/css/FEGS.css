@@ -8,9 +8,27 @@ body {
     position: relative;
     margin: 0;
 }
+
+#home_image_container {
+    position: absolute;
+    text-align: center;
+    right: 0;
+    left: 0;
+    top: 20%;
+}
+
+#home_image{
+    width: 180px;
+    height: 180px;
+}
+
 #home_text {
     margin-top: 0;
     margin-bottom: 0;
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 20%;
 }
 
 #pageContainer {
@@ -20,6 +38,7 @@ body {
 .page {
     height: 100%;
     width: 100%;
+    position: relative;
 }
 
 h1 {
