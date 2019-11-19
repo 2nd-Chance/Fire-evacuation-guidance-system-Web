@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>화재 대피 시스템</title>
+
+    <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js'></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/device-handler.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/room-handler.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+
+<div id="roomList" hidden></div>
+<div id="deviceList" hidden></div>
+ROOM: <input type="button" onclick="getRoom()" value="update">
+<div id="roomHtml" class="redBoxWrapper"></div>
+<div>* displays contents inside the #roomHtml</div>
+<br>
+DEVICE: <input type="button" onclick="getDevices()" value="update">
+<div id="deviceHtml" class="redBoxWrapper"></div>
+<div>* displays contents inside the #deviceHtml</div>
+
+
+</body>
+</html>

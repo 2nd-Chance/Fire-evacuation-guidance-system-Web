@@ -1,0 +1,13 @@
+body{
+    color:#000000;
+    margin: 0;
+    margin-width:0;
+    margin-height:0;
+    background-color:#A3A6BA;
+}
+.redBoxWrapper{
+    border: red 2px solid;
+    background-color: white;
+    white-space: normal;
+    word-wrap: break-word;
+}
