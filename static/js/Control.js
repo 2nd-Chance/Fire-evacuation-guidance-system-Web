@@ -13,12 +13,12 @@ class Control {
     }
 
     setAlert(alert){
-        this._alert = alert;
+        this.alert = alert;
         this.changeHomeText(alert);
     }
 
     getAlert(){
-        return this._alert;
+        return this.alert;
     }
 
 

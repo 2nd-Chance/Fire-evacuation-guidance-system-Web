@@ -6,6 +6,7 @@
 <script src="../static/js/EditMapCanvas.js"></script>
 <script src="../static/js/EvacuationRouteCanvas.js"></script>
 <script src="../static/js/Control.js"></script>
+
 <head>
     <meta charset="UTF-8">
     <title>Fire Evacuation Guidance System</title>
@@ -22,10 +23,15 @@
             control = new Control();
             control.setAlert(false);
 
-            EMCanvas.drawTrashCan();
+            //EMCanvas.drawTrashCan();
             setCanvasSize();
         }
-
+        function drawTest(){
+            let img = new Image();
+            img.src = "../static/image/node_red.png";
+            let ctx = document.getElementById("Edit_Map_canvas").getContext("2d");
+            ctx.drawImage(img, 10,10,50,50,);
+        }
         function setCanvasSize() {
             let _page = document.querySelector("div.page");
             let _canvas1 = document.getElementById("Edit_Map_canvas");
@@ -95,19 +101,18 @@
             <h1 id="home_text">There is no fire. <br> You are safe.</h1>
         </div>
         <div id="Edit_Map" class="page">
+            <div id="save_mode_button" class="cursorPointer" style="display: block; float: right; padding-top: 3px; padding-right: 3px;">
+                <img src="../static/image/pen-write_black.png" onclick="EMCanvas.changeMode()">
+                <img src="../static/image/save_black.png" onclick="EMCanvas.saveMap()">
+            </div>
             <div class="canvasContainer">
-                <div id="save_mode_button" class="cursorPointer" style="display: block; float: right; padding-top: 3px; padding-right: 3px;">
-                    <img src="../static/image/pen-write_black.png" onclick="EMCanvas.changeMode()">
-                    <img src="../static/image/save_black.png" onclick="EMCanvas.saveMap()">
-                </div>
-                <canvas id="Edit_Map_canvas" onclick="EMCanvas.canvasEvent(event)"></canvas>
+                <canvas id="Edit_Map_canvas" ></canvas>
                 <div id="nodeCollection_open_button" class="cursorPointer" onClick="showNodeCollection()">
                     <img src="../static/image/up-arrow_black.png">
                 </div>
+                    <img src="../static/image/trash_bin_black.png" id="trashBin">
             </div>
-<!--            <div id="trashBin">-->
-<!--                <img src="static/image/trash_bin_black.png">-->
-<!--            </div>-->
+
             <div id="nodeCollection" style="display: none;">
                 <div id="nodeCollection_close_button" class="cursorPointer" onclick="hideNodeCollection()">
                     <img src="../static/image/down-arrow_black.png">
@@ -122,7 +127,17 @@
             </div>
 
             <div id="roomList" style="display: none; float: right;">
-                <room roomId="1" alertState="0" name="room1" X="0" Y="0" level="0">
+                <room roomId="1" alertState="0" name="room1" X="0" Y="0" level="0" route="green">
+                    <statcieDevice>
+
+                    </statcieDevice>
+                    <dynamicDevice>
+
+                    </dynamicDevice>
+                    <linkTo>2</linkTo>
+                    <linkTo>3</linkTo>
+                </room>
+                <room roomId="2" alertState="0" name="room2" X="100" Y="100" level="0" route="green">
                     <statcieDevice>
 
                     </statcieDevice>
@@ -133,18 +148,7 @@
                     <linkTo>2</linkTo>
                     <linkTo>3</linkTo>
                 </room>
-                <room roomId="2" alertState="0" name="room2" X="0" Y="0" level="0">
-                    <statcieDevice>
-
-                    </statcieDevice>
-                    <dynamicDevice>
-
-                    </dynamicDevice>
-
-                    <linkTo>2</linkTo>
-                    <linkTo>3</linkTo>
-                </room>
-                <room roomId="3" alertState="0" name="room3" X="0" Y="0" level="0">
+                <room roomId="3" alertState="0" name="room3" X="100" Y="200" level="0" route="black">
                     <statcieDevice>
 
                     </statcieDevice>
