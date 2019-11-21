@@ -1,237 +1,113 @@
+from flask import Flask, url_for, render_template, request, redirect, session, jsonify
+import hashlib
+import logging
 import redis
-from flask import Flask, request, render_template, json, jsonify
+import random
+from Database import RedisDB
 
+con = RedisDB.RedisDB()
 app = Flask(__name__)
 
-db = redis.Redis(
-    host="192.168.1.102"
-)
-
-
-def byteToString(obj):
-    return obj.decode("utf-8")
-
-
-def get_list(obj, convert_method):
-    my_list = list()
-    for val in obj:
-        my_list.append(convert_method(val))
-    return my_list
-
-
-def string_to_list(list_string):
-    if not list_string.startswith("[") or not list_string.endswith("]"):
-        raise Exception("Not a list format:", list_string)
-
-    return json.loads(list_string)
+logging.basicConfig(level=logging.INFO)
 
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == 'GET':
-        return render_template("index.html", reqMethod=request.method)
-    elif request.method == 'POST':
-        return render_template("index.html", reqMethod=request.method)
+    return render_template('home.html')
+    # if session.get('logged_in'):
+    #    return render_template('home.html')
+    # else:
+    #    return redirect(url_for('login'))
+
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if request.method == "GET":
+        return render_template('login.html')
     else:
-        return render_template("index.html")
+        username = request.form['email']
+        passwd = hashlib.sha256(request.form['password'].encode()).hexdigest().encode()
+        try:
+            db_passwd = con.db.hmget("user_list", username)[0]
+        except redis.RedisError:
+            return render_template('login.html', login_value="Fail to login")
+        if passwd == db_passwd:
+            session['logged_in'] = True
+            return redirect(url_for('home'))
+        else:
+            return render_template('login.html', login_value="Fail to login")
 
 
-@app.route('/test')
-def test():
-    return "testing..."
+@app.route("/register/", methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['email']
+        passwd = hashlib.sha256(request.form['password'].encode()).hexdigest().encode()
+        con.db.hmset("user_list", {username: passwd})
+        return redirect(url_for('login'))
+    return render_template("register.html")
 
 
-@app.route('/get/deviceIds', methods=['GET', 'POST'])
-def get_device_ids():
-    key = "device"
-    if not db.exists(key):
-        return 'No Content', 204
-
-    device_ids = get_list(db.smembers(key), byteToString)
-    return jsonify(device_ids)
+@app.route("/request_alert", methods=['POST'])
+def request_alert_status():
+    return jsonify(dict(alert=con.get_alert_status()))
 
 
-@app.route('/get/device', methods=['GET', 'POST'])
-def get_device():
-    if request.method == 'GET':
-        key = request.args.get("key")
-    else:
-        key = request.form["key"]
-
-    if not db.exists(key):
-        return 'No Content', 204
-
-    device = dict()
-    device["uuid"] = key
-    device["bluetoothMac"] = byteToString(db.hget(key, "bm"))
-    device["roomId"] = int(db.hget(key, "rm"))
-    device["deviceType"] = byteToString(db.hget(key, "dt"))
-    device["deviceClass"] = int(db.hget(key, "cl"))
-    device["alertState"] = int(db.hget(key, "ar")) != 0
-    device["aliveState"] = int(db.hget(key, "al")) != 0
-    if device["deviceClass"] in (1, 2):
-        device["sensorType"] = byteToString(db.hget(key, "st"))
-        device["sensorValue"] = byteToString(db.hget(key, "sv"))
-    return jsonify(device)
+@app.route("/request_make_room", methods=['POST'])
+def request_make_room():
+    value = request.form.to_dict()
+    room_info = {}
+    for room_key, room_value in value.items():
+        room_info[room_key.encode()] = room_value.encode()
+    logging.info(room_info)
+    con.set_contents(RedisDB.GenericStructure(room_info))
+    return jsonify(room_info)
 
 
-@app.route('/update/device', methods=['GET', 'POST'])
-def update_device():
-    if request.method == 'GET':
-        device_json = request.args.get("deviceJson")
-        print(device_json)
-    else:
-        device_json = request.form["deviceJson"]
-        print(device_json)
-    device = json.loads(device_json)
-
-    if not db.exists(device["uuid"]):
-        return 'No Content', 204
-
-    result = add_device_to_db(device)
-    return "{}".format(result)
+@app.route("/request_statics", methods=['POST'])
+def request_statics():
+    statics = {"statics": []}
+    device_list = con.get_id_from_list('devices')
+    logging.info(device_list)
+    for id in device_list:
+        id = id.decode()
+        device = con.get_contents(id)
+        logging.info(device.generic_map)
+        if device.get('dt') == 's':
+            statics["statics"].append("{}_{}".format(id, device.get('st')))
+    return jsonify(statics)
 
 
-@app.route('/add/device', methods=['GET', 'POST'])
-def add_device():
-    if request.method == 'GET':
-        device_json = request.args.get("deviceJson")
-        print(device_json)
-    else:
-        device_json = request.form["deviceJson"]
-        print(device_json)
-    device = json.loads(device_json)
-
-    result = add_device_to_db(device)
-    return "{}".format(result)
+@app.route("/request_room_list", methods=['POST'])
+def request_room_list():
+    result = {'room_list': []}
+    for room in con.db.keys("rooms|*"):
+        result['room_list'].append(room.decode())
+    return jsonify(result)
 
 
-def add_device_to_db(device):
-    if "uuid" not in device or device["uuid"] == "":
-        return False
+@app.route("/request_connect_room", methods=['POST'])
+def request_connect_room():
+    _1 = request.form['0']
+    _2 = request.form['1']
+    update_1 = {
+        b"id": _1,
+        b"lk": "links|{}".format(_1),
+    }
+    update_2 = {
+        b"id": _2,
+        b"lk": "links|{}".format(_2),
+    }
+    con.db.hmset(_1, update_1)
+    con.db.hmset(_2, update_2)
 
-    value_dict = dict()
-    if "uuid" in device:
-        value_dict["id"] = device["uuid"]
-    if "bluetoothMac" in device:
-        value_dict["bm"] = device["bluetoothMac"]
-    if "roomId" in device:
-        value_dict["rm"] = device["roomId"]
-    if "deviceType" in device:
-        value_dict["dt"] = device["deviceType"]
-    if "deviceClass" in device:
-        value_dict["dc"] = device["deviceClass"]
-    if "alertState" in device:
-        value_dict["ar"] = 1 if device["alertState"] == 'true' else 0
-    if "aliveState" in device:
-        value_dict["al"] = 1 if device["aliveState"] == 'true' else 0
-    if "sensorType" in device:
-        value_dict["st"] = device["sensorType"]
-    if "sensorValue" in device:
-        value_dict["sv"] = device["sensorValue"]
+    con.db.sadd(update_1[b'lk'], _2)
+    con.db.sadd(update_2[b'lk'], _1)
 
-    db.sadd("device", device["uuid"])
-    db.hmset(device["uuid"], value_dict)
-    return True
-
-
-@app.route('/get/roomIds', methods=['GET', 'POST'])
-def get_room_ids():
-    key = "room"
-    if not db.exists(key):
-        return 'No Content', 204
-
-    room_ids = get_list(db.smembers(key), int)
-    return jsonify(room_ids)
-
-
-@app.route('/get/room', methods=['GET', 'POST'])
-def get_room():
-    if request.method == 'GET':
-        key = request.args.get("key")
-    else:
-        key = request.form["key"]
-
-    if not db.exists(key):
-        return 'No Content', 204
-
-    room = dict()
-    room["roomId"] = int(key)
-    room["name"] = byteToString(db.hget(key, "nm"))
-    room["locationX"] = int(db.hget(key, "x"))
-    room["locationY"] = int(db.hget(key, "y"))
-    room["locationLevel"] = int(db.hget(key, "lv"))
-    room["alertState"] = int(db.hget(key, "ar")) != 0
-    room["aliveState"] = int(db.hget(key, "al")) != 0
-    room["links"] = string_to_list(byteToString(db.hget(key, "lk")))
-    room["staticDevices"] = string_to_list(byteToString(db.hget(key, "sd")))
-    room["dynamicDevices"] = string_to_list(byteToString(db.hget(key, "dd")))
-    return jsonify(room)
-
-
-@app.route('/update/room', methods=['GET', 'POST'])
-def update_room():
-    if request.method == 'GET':
-        room_json = request.args.get("roomJson")
-    else:
-        room_json = request.form["roomJson"]
-    room = json.loads(room_json)
-
-    if not db.exists(room["roomId"]):
-        return 'No Content', 204
-
-    result = add_room_to_db(room)
-    return "{}".format(result)
-
-
-@app.route('/add/room', methods=['GET', 'POST'])
-def add_room():
-    if request.method == 'GET':
-        room_json = request.args.get("roomJson")
-    else:
-        room_json = request.form["roomJson"]
-    room = json.loads(room_json)
-
-    result = add_room_to_db(room)
-    return "{}".format(result)
-
-
-def add_room_to_db(room):
-    if "roomId" not in room or room["roomId"] == "":
-        return False
-
-    value_dict = dict()
-    if "roomId" in room:
-        value_dict["id"] = room["roomId"]
-    if "name" in room:
-        value_dict["nm"] = room["name"]
-    if "locationX" in room:
-        value_dict["x"] = room["locationX"]
-    if "locationY" in room:
-        value_dict["y"] = room["locationY"]
-    if "locationLevel" in room:
-        value_dict["lv"] = room["locationLevel"]
-    if "alertState" in room:
-        value_dict["ar"] = 1 if room["alertState"] == 'true' else 0
-    if "aliveState" in room:
-        value_dict["al"] = 1 if room["aliveState"] == 'true' else 0
-    if "links" in room:
-        value_dict["lk"] = "[" \
-                           + (','.join(str(e) for e in room["links"])) + \
-                           "]"
-    if "staticDevices" in room:
-        value_dict["sd"] = "[" \
-                           + (','.join(("\"" + e + "\"") for e in room["staticDevices"])) \
-                           + "]"
-    if "dynamicDevices" in room:
-        value_dict["dd"] = "[" \
-                           + (','.join(("\"" + e + "\"") for e in room["dynamicDevices"])) \
-                           + "]"
-    db.sadd("room", room["roomId"])
-    db.hmset(room["roomId"], value_dict)
-    return True
+    return jsonify(update_1)
 
 
 if __name__ == '__main__':
-    app.config["CACHE_TYPE"] = "null"
+    key = hashlib.sha256(str(random.randrange(0, 1e+10)).encode()).hexdigest().encode()
+    app.secret_key = key
     app.run(host="0.0.0.0", port="4000")

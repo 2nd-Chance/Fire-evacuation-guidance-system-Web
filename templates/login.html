@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>화재 대피 시스템 - 로그인</title>
+    <meta name="description" content="Login - Register Template">
+    <meta name="author" content="Lorenzo Angelino aka MrLolok">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js'></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background-color: #303641;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container-login">
+        <div id="title">
+            <i class="material-icons lock">lock</i> Login
+        </div>
+
+        <form action="/login" method="POST">
+            <div class="input">
+                <div class="input-addon">
+                    <i class="material-icons">face</i>
+                </div>
+                <input id="email" placeholder="Email" type="email" required class="validate" autocomplete="off" name="email">
+            </div>
+
+            <div class="clearfix"></div>
+
+            <div class="input">
+                <div class="input-addon">
+                    <i class="material-icons">vpn_key</i>
+                </div>
+                <input id="password" placeholder="Password" type="password" required class="validate" autocomplete="off" name="password">
+            </div>
+            <br>
+
+            {{ login_value }}
+            <br>
+
+            <input type="submit" value="Log In" />
+        </form>
+
+        <div class="register">
+            Don't have an account yet?
+            <a href="/register/"><button id="register-link">Register here</button></a>
+        </div>
+    </div>
+</body>
+</html>
