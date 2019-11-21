@@ -1,11 +1,17 @@
-/*#Edit_Map_canvas {*/
-/*    width: 100%;*/
-/*    height: 100%;*/
-/*}*/
-
 .canvasContainer {
     width: 100%;
     height: 100%;
+    position: relative;
+}
+
+#Edit_Map_canvas {
+    position: relative;
+    z-index: 1;
+    width: 400px;
+    height: 400px;
+}
+
+#Edit_Map {
     position: relative;
 }
 
@@ -15,12 +21,15 @@
     text-align: center;
     position: absolute;
     border-top: 1px solid black;
+    z-index: 2;
 }
 
 #trashBin {
     position: absolute;
-    bottom: 30%;
-    right: 5%;
+    width: auto;
+    bottom: 40px;
+    right: 0;
+    z-index: 3;
 }
 
 #nodeCollection_close_button{
@@ -32,9 +41,10 @@
     height: 40%;
     width: 100%;
     position: absolute;
-    bottom: 20%;
+    bottom: 0;
     border-top: 1px solid black;
     background-color: white;
+    z-index: 4;
 }
 
 .node {
@@ -45,4 +55,11 @@
     width: 100%;
     display: block;
     text-align: center;
+}
+
+#save_mode_button{
+    position: absolute;
+    right:0;
+    z-index: 5;
+    display: inline;
 }
