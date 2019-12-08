@@ -13,11 +13,10 @@ logging.basicConfig(level=logging.INFO)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template('home.html')
-    # if session.get('logged_in'):
-    #    return render_template('home.html')
-    # else:
-    #    return redirect(url_for('login'))
+    if session.get('logged_in'):
+        return render_template('home.html')
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -61,6 +60,9 @@ def request_make_room():
         room_info[room_key.encode()] = room_value.encode()
     logging.info(room_info)
     con.set_contents(RedisDB.GenericStructure(room_info))
+    device_id = room_info[b'id'].decode().split("|")[1]
+    device_id = device_id.split("_")[0].encode()
+    con.db.hmset(device_id, {b'rm': room_info[b'id']})
     return jsonify(room_info)
 
 
@@ -83,6 +85,43 @@ def request_room_list():
     result = {'room_list': []}
     for room in con.db.keys("rooms|*"):
         result['room_list'].append(room.decode())
+    return jsonify(result)
+
+
+@app.route("/request_devices_status", methods=['POST'])
+def request_devices_status():
+    result = {'devices_info': []}
+    for device_key in con.get_id_from_list("devices"):
+        info = con.get_contents(device_key)
+        room_key = info.get('rm')
+        if room_key:  # key is exist
+            temp = con.get_contents(room_key).get()
+            room_info = {}
+            for field in temp.keys():
+                try:
+                    room_info[info.room_trans_map[field]] = temp.get(field)
+                    if info.room_trans_map[field] == "links":
+                        link_id = room_info[info.room_trans_map[field]]
+                        links_info = con.db.smembers(link_id)
+                        links_info = list(links_info)
+                        for idx, link in enumerate(links_info):
+                            links_info[idx] = link.decode()
+                        room_info[info.room_trans_map[field]] = links_info
+                except KeyError:
+                    room_info[field] = info.get(field)
+            info.generic_map[b'rm'] = room_info
+
+        device_info = {}
+        for field in info.generic_map.keys():
+            data = info.generic_map[field]
+            if type(data) != type(dict()):
+                data = data.decode()
+            try:
+                device_info[info.device_trans_map[field.decode()]] = data
+            except KeyError:
+                device_info[field.decode()] = data
+
+        result['devices_info'].append(device_info)
     return jsonify(result)
 
 

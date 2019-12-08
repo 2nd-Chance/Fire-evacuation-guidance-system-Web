@@ -1,3 +1,8 @@
+let request_timer = null;
+let request_display_timer = null;
+let previous_alert_state = null;
+let previous_info_data = null;
+
 function request_alert_status() {
     $.ajax({
         type:'POST',
@@ -19,15 +24,18 @@ function home_btn_state(alert) {
     let normal_url = "/static/image/peaceful.gif";
     let emergency_url = "/static/image/emergency.gif";
     let html_code = "";
-    if (alert === false) {
-        html_code += "<h1 style='text-align: center; color: green; margin-top: 80px'>당신은 안전합니다.</h1>";
-        html_code += "<img src='" + normal_url + "' height='250px' id='run_away'>";
-    } else {
-        html_code += "<h1 style='text-align: center; color: red; margin-top: 80px'>도망 치십시오.</h1>";
-        html_code += "<img src='" + emergency_url + "' height='250px' id='run_away'>";
+    if (previous_alert_state !== alert) {
+        if (alert === false) {
+            html_code += "<h1 style='text-align: center; color: green; margin-top: 80px'>아무 문제 없으니 마음껏 돌아다니십시오.</h1>";
+            html_code += "<img src='" + normal_url + "' height='250px' id='run_away'>";
+        } else {
+            html_code += "<h1 style='text-align: center; color: red; margin-top: 80px'>도망 치십시오.</h1>";
+            html_code += "<img src='" + emergency_url + "' height='250px' id='run_away'>";
+        }
+        $('#main').html("");
+        $('#main').append(html_code);
+        previous_alert_state = alert;
     }
-    $('#main').html("");
-    $('#main').append(html_code);
 }
 
 function prepare_to_make_room() {
@@ -151,32 +159,90 @@ function prepare_to_connect_a_room() {
     });
 }
 
-var request_timer = null;
+function request_display_modules() {
+    $.ajax({
+        type: 'POST',
+        url: '/request_devices_status',
+        data: {
+            devices_info: []
+        },
+        dataType: 'JSON',
+        success: function (value) {
+
+            let device_info_list = value.devices_info;
+            let result = "";
+            let keys = new Set();
+            device_info_list.forEach(function (item, index, array) {
+                for (let field in item)
+                    keys.add(field)
+            });
+            result += "<div class=\"table-responsive\">";
+            result += "<table class=\"table table-small-font table-bordered table-striped\">";
+            result += "<caption>등록된 모듈</caption>";
+            result += "<thead><tr>";
+            for (let field of keys) {
+                if (field === "room id")
+                    field = "room name";
+                result += "<th>"+field+"</th>"
+            }
+            result += "</tr></thead>";
+            result += "<tbody>";
+            device_info_list.forEach(function (item, index, array) {
+                let option = item['alert state'] === "1" ? "class=\"alert\"" : "";
+                result += "<tr "+option+">";
+                for (let field of keys) {
+                    if (field in item) {
+                        if (field === "room id") {
+                            result += "<td>"+item[field]["name"]+"</td>";
+                        } else {
+                            result += "<td>" + item[field] + "</td>";
+                        }
+                    } else {
+                        result += "<td></td>"
+                    }
+                }
+                result += "</tr>";
+            });
+            result += "</tbody>";
+            result += "</table></div>";
+
+            if (previous_info_data !== result) {
+                $('#main').html(result);
+                previous_info_data = result
+            }
+        }
+    });
+}
 
 window.onload = function() {
-    request_timer = setInterval(request_alert_status, 3000);
-
+    request_alert_status();
+    request_timer = setInterval(request_alert_status, 500);
     $('#cssmenu ul li').click(function(){
-        var active_state = {
+        let active_state = {
             'home_btn':false,
             'edit_btn':false,
             'make_room_btn':false,
             'connect_room_btn':false,
-            'evac_btn':false,
+            'display_status':false,
         };
 
         clearInterval(request_timer);
+        clearInterval(request_display_timer);
+        previous_info_data = null;
+        previous_alert_state = null;
 
         active_state[$(this).attr('id')] = true;
         $('#main').html("");
 
         $('#cssmenu ul li').each(function() {
-            var cur_id = $(this).attr('id');
+            let cur_id = $(this).attr('id');
             $(this).attr('class', '');
             if(active_state[cur_id]) {
                 $(this).attr('class', 'active');
                 switch(cur_id) {
                     case 'home_btn':
+                        console.log("clicked");
+                        request_alert_status();
                         request_timer = setInterval(request_alert_status, 500);
                         break;
                     case 'make_room_btn':
@@ -185,7 +251,8 @@ window.onload = function() {
                     case 'connect_room_btn':
                         prepare_to_connect_a_room();
                         break;
-                    case 'evac_btn':
+                    case 'display_status':
+                        request_display_timer = setInterval(request_display_modules, 500);
                         break;
                 }
             }
