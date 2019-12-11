@@ -188,7 +188,7 @@ function request_display_modules() {
             result += "</tr></thead>";
             result += "<tbody>";
             device_info_list.forEach(function (item, index, array) {
-                let option = item['alert state'] === "1" ? "class=\"alert\"" : "";
+                let option = item['alert state'] === "1" ? "style=\"background-color: #ffa7ac;\"" : "";
                 result += "<tr "+option+">";
                 for (let field of keys) {
                     if (field in item) {
